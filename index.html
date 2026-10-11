@@ -519,50 +519,68 @@ document.getElementById("savePoster").addEventListener("click", async () => {
   status.textContent = "";
   try {
     await document.fonts.ready;
-    const canvas = await html2canvas(document.querySelector(".sheet"), {
-      scale: 3, backgroundColor: "#ffffff", useCORS: true,
-      onclone: doc => {
-        const width = document.querySelector(".sheet").getBoundingClientRect().width;
+    const sheet = document.querySelector(".sheet");
+    const scale = 3;
+    // Rasterize decorations in the live document. Mobile WebKit can lose SVG
+    // images when html2canvas renders them inside its cloned document.
+    const decorations = await Promise.all(
+      [...sheet.querySelectorAll(".gridcorner, .bands, .d-cursor")].map(async element => {
+        const {width, height} = element.getBoundingClientRect();
+        let svg;
+        if (element.classList.contains("gridcorner")) {
+          const points = element.classList.contains("r")
+            ? `${width},${height * .28} ${width},${height} 0,${height}`
+            : `0,${height * .28} ${width},${height} 0,${height}`;
+          svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><defs><pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse"><rect width="30" height="30" fill="#2A2B2C"/><path d="M0 30V0H30" fill="none" stroke="white" stroke-opacity=".13" stroke-width="2"/></pattern></defs><polygon points="${points}" fill="url(#grid)"/></svg>`;
+        } else {
+          const copy = element.cloneNode(true);
+          copy.removeAttribute("class");
+          copy.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+          copy.setAttribute("width", width);
+          copy.setAttribute("height", height);
+          if (element.matches(".bands.r")) {
+            const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            group.setAttribute("transform", "translate(300 0) scale(-1 1)");
+            while (copy.firstChild) group.appendChild(copy.firstChild);
+            copy.appendChild(group);
+          }
+          svg = new XMLSerializer().serializeToString(copy);
+        }
+        const image = new Image();
+        await new Promise((resolve, reject) => {
+          image.onload = resolve;
+          image.onerror = () => reject(new Error("無法載入海報背景"));
+          image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+        });
+        const bitmap = document.createElement("canvas");
+        bitmap.width = Math.ceil(width * scale);
+        bitmap.height = Math.ceil(height * scale);
+        bitmap.getContext("2d").drawImage(image, 0, 0, bitmap.width, bitmap.height);
+        return bitmap.toDataURL("image/png");
+      })
+    );
+    const canvas = await html2canvas(sheet, {
+      scale, backgroundColor: "#ffffff", useCORS: true,
+      onclone: async doc => {
+        const width = sheet.getBoundingClientRect().width;
         // Resolve container units for renderers that do not support cqw.
         doc.querySelectorAll("style").forEach(style => {
           style.textContent = style.textContent.replace(/([\d.]+)cqw/g, (_, n) => `${Number(n) * width / 100}px`);
         });
-        // html2canvas does not render CSS clip-path or mirrored SVGs reliably.
-        // Bake those effects into SVG images only in the export clone.
-        doc.querySelectorAll(".sheet .gridcorner, .sheet .bands").forEach(element => {
+        // PNGs avoid SVG decoding and CSS clip-path/mirroring in the renderer.
+        await Promise.all([...doc.querySelectorAll(".sheet .gridcorner, .sheet .bands, .sheet .d-cursor")].map((element, index) => {
           const image = doc.createElement("img");
           image.className = element.getAttribute("class");
-          let svg;
-          if (element.classList.contains("gridcorner")) {
-            const {width: w, height: h} = element.getBoundingClientRect();
-            const points = element.classList.contains("r")
-              ? `${w},${h * .28} ${w},${h} 0,${h}`
-              : `0,${h * .28} ${w},${h} 0,${h}`;
-            svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><defs><pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse"><rect width="30" height="30" fill="#2A2B2C"/><path d="M0 30V0H30" fill="none" stroke="white" stroke-opacity=".13" stroke-width="2"/></pattern></defs><polygon points="${points}" fill="url(#grid)"/></svg>`;
-            image.style.background = "none";
-            image.style.clipPath = "none";
-          } else {
-            const copy = element.cloneNode(true);
-            // The clone contains computed CSS; keep only the SVG attributes.
-            copy.removeAttribute("style");
-            copy.querySelectorAll("[style]").forEach(node => node.removeAttribute("style"));
-            copy.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-            const bounds = element.getBoundingClientRect();
-            copy.setAttribute("width", bounds.width);
-            copy.setAttribute("height", bounds.height);
-            if (element.classList.contains("r")) {
-              const group = doc.createElementNS("http://www.w3.org/2000/svg", "g");
-              group.setAttribute("transform", "translate(300 0) scale(-1 1)");
-              while (copy.firstChild) group.appendChild(copy.firstChild);
-              copy.appendChild(group);
-            }
-            copy.removeAttribute("class");
-            svg = new XMLSerializer().serializeToString(copy);
-            image.style.transform = "none";
-          }
-          image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-          element.replaceWith(image);
-        });
+          image.style.background = "none";
+          image.style.clipPath = "none";
+          image.style.transform = "none";
+          return new Promise((resolve, reject) => {
+            image.onload = resolve;
+            image.onerror = () => reject(new Error("無法載入海報背景"));
+            image.src = decorations[index];
+            element.replaceWith(image);
+          });
+        }));
       }
     });
     const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
