@@ -527,6 +527,42 @@ document.getElementById("savePoster").addEventListener("click", async () => {
         doc.querySelectorAll("style").forEach(style => {
           style.textContent = style.textContent.replace(/([\d.]+)cqw/g, (_, n) => `${Number(n) * width / 100}px`);
         });
+        // html2canvas does not render CSS clip-path or mirrored SVGs reliably.
+        // Bake those effects into SVG images only in the export clone.
+        doc.querySelectorAll(".sheet .gridcorner, .sheet .bands").forEach(element => {
+          const image = doc.createElement("img");
+          image.className = element.getAttribute("class");
+          let svg;
+          if (element.classList.contains("gridcorner")) {
+            const {width: w, height: h} = element.getBoundingClientRect();
+            const points = element.classList.contains("r")
+              ? `${w},${h * .28} ${w},${h} 0,${h}`
+              : `0,${h * .28} ${w},${h} 0,${h}`;
+            svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><defs><pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse"><rect width="30" height="30" fill="#2A2B2C"/><path d="M0 30V0H30" fill="none" stroke="white" stroke-opacity=".13" stroke-width="2"/></pattern></defs><polygon points="${points}" fill="url(#grid)"/></svg>`;
+            image.style.background = "none";
+            image.style.clipPath = "none";
+          } else {
+            const copy = element.cloneNode(true);
+            // The clone contains computed CSS; keep only the SVG attributes.
+            copy.removeAttribute("style");
+            copy.querySelectorAll("[style]").forEach(node => node.removeAttribute("style"));
+            copy.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+            const bounds = element.getBoundingClientRect();
+            copy.setAttribute("width", bounds.width);
+            copy.setAttribute("height", bounds.height);
+            if (element.classList.contains("r")) {
+              const group = doc.createElementNS("http://www.w3.org/2000/svg", "g");
+              group.setAttribute("transform", "translate(300 0) scale(-1 1)");
+              while (copy.firstChild) group.appendChild(copy.firstChild);
+              copy.appendChild(group);
+            }
+            copy.removeAttribute("class");
+            svg = new XMLSerializer().serializeToString(copy);
+            image.style.transform = "none";
+          }
+          image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+          element.replaceWith(image);
+        });
       }
     });
     const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
