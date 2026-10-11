@@ -7,7 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="vendor/qrcode.min.js"></script>
+<script src="vendor/html2canvas.min.js"></script>
 <style>
 :root{
   --yellow:#FFE500;      /* 標題亮黃 */
@@ -173,7 +174,7 @@ footer .in{max-width:780px;margin:0 auto;display:flex;justify-content:space-betw
 .qr-warn{font-size:.85rem;color:var(--alert);max-width:44cqw;margin:0}
 .qr-box .how{margin:2.4cqw 0 0;font-weight:900;color:var(--teal);font-size:4.2cqw;line-height:1.4}
 .sheet .org{font-size:3.4cqw}
-.poster-actions{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:16px}
+.poster-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center;margin-top:16px}
 .poster-actions .ghost{padding:10px 24px;font-size:1rem}
 
 @media (max-width:640px){
@@ -293,7 +294,7 @@ footer .in{max-width:780px;margin:0 auto;display:flex;justify-content:space-betw
 <footer>
   <div class="in">
     <span>奇美醫院 教學部 臨床技能中心</span>
-    <button type="button" class="ghost" id="posterBtn">製作張貼用 QR 海報</button>
+    <button type="button" class="ghost" id="posterBtn">Qrcode海報</button>
   </div>
 </footer>
 
@@ -316,8 +317,10 @@ footer .in{max-width:780px;margin:0 auto;display:flex;justify-content:space-betw
     </div>
     <div class="poster-actions">
       <button type="button" class="primary" id="printBtn">列印海報</button>
+      <button type="button" class="ghost" id="savePoster">儲存照片</button>
       <button type="button" class="ghost" id="closePoster">關閉</button>
     </div>
+    <p id="posterStatus" class="status" role="status" style="color:#fff;text-align:center"></p>
   </div>
 </div>
 
@@ -508,6 +511,42 @@ document.getElementById("posterBtn").addEventListener("click", () => {
 });
 document.getElementById("closePoster").addEventListener("click", () => poster.classList.remove("open"));
 document.getElementById("printBtn").addEventListener("click", () => window.print());
+document.getElementById("savePoster").addEventListener("click", async () => {
+  const button = document.getElementById("savePoster");
+  const status = document.getElementById("posterStatus");
+  button.disabled = true;
+  button.textContent = "儲存中…";
+  status.textContent = "";
+  try {
+    await document.fonts.ready;
+    const canvas = await html2canvas(document.querySelector(".sheet"), {
+      scale: 3, backgroundColor: "#ffffff", useCORS: true,
+      onclone: doc => {
+        const width = document.querySelector(".sheet").getBoundingClientRect().width;
+        // Resolve container units for renderers that do not support cqw.
+        doc.querySelectorAll("style").forEach(style => {
+          style.textContent = style.textContent.replace(/([\d.]+)cqw/g, (_, n) => `${Number(n) * width / 100}px`);
+        });
+      }
+    });
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+    if (!blob) throw new Error("無法產生圖片");
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `臨床技能中心滿意度調查-${YEAR}-Qrcode海報.png`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    status.textContent = "已下載 PNG 圖片。";
+  } catch (err) {
+    status.textContent = "儲存失敗，請稍後再試。";
+  } finally {
+    button.disabled = false;
+    button.textContent = "儲存照片";
+  }
+});
 document.addEventListener("keydown", e => { if (e.key === "Escape") poster.classList.remove("open"); });
 </script>
 </body>
