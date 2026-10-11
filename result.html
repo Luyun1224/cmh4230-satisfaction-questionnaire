@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>臨床技能中心滿意度儀表板｜奇美醫院</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --yellow:#FFE500; --mustard:#F4CF45; --cyan:#1AD5DE;
+  --teal:#0E4B4F; --teal-deep:#08353A;
+  --grey:#E6E6E6; --paper:#F3F3F1; --ink:#1D2B2D; --muted:#5C6B6D; --line:rgba(14,75,79,.14);
+  --alert:#C8452A;
+  /* 滿意度量表：兩端暖冷對比，中間灰 */
+  --s1:#B9442A; --s2:#E58A6E; --s3:#C9CDCD; --s4:#3FA9B0; --s5:#0F6E75;
+  --grid:#2A2B2C;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  margin:0;color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;font-size:16px;line-height:1.6;
+  background-color:var(--paper);
+  background-image:linear-gradient(rgba(14,75,79,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(14,75,79,.05) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+
+/* ================= 主視覺 ================= */
+.hero{position:relative;overflow:hidden;height:clamp(250px,26vw,320px);border-bottom:5px solid var(--teal)}
+.art{position:absolute;inset:0;overflow:hidden;
+  background:radial-gradient(ellipse 55% 60% at 50% 40%, rgba(255,252,224,.95), rgba(255,255,255,0) 70%),
+    repeating-conic-gradient(from -90deg at 50% 0%, #EFEFEF 0 2.5deg, #DFDFDF 2.5deg 5deg), var(--grey)}
+.gridcorner{position:absolute;bottom:0;width:40%;height:70%;background-color:var(--grid);
+  background-image:linear-gradient(rgba(255,255,255,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.13) 1px,transparent 1px);background-size:26px 26px}
+.gridcorner.l{left:0;clip-path:polygon(0 30%,100% 100%,0 100%)}
+.gridcorner.r{right:0;clip-path:polygon(100% 30%,100% 100%,0 100%)}
+.bands{position:absolute;top:0;height:100%;width:26%}
+.bands.l{left:0}.bands.r{right:0;transform:scaleX(-1)}
+.hero-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 16px;text-align:center}
+.title{margin:0;font-weight:900;font-size:clamp(2.1rem,6.4vw,4.4rem);line-height:1.1;letter-spacing:.03em;transform:skewX(-7deg)}
+.title span{position:relative;display:inline-block;isolation:isolate;white-space:nowrap}
+.title span::before{content:attr(data-text);position:absolute;inset:0;z-index:-1;color:var(--teal);-webkit-text-stroke:.2em var(--teal);filter:drop-shadow(.05em .06em 0 var(--teal-deep))}
+.title .t1{color:var(--yellow)} .title .t2{color:#fff;margin-left:.35em}
+.org{margin:.9em 0 0;background:#fff;border:3px solid var(--teal);border-radius:12px;padding:.1em 1em;font-weight:700;color:var(--teal);font-size:clamp(.85rem,1.6vw,1.05rem);box-shadow:4px 4px 0 var(--teal);transform:rotate(1.2deg)}
+
+/* ================= 版面 ================= */
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px 64px}
+.panel{background:#fff;border:3px solid var(--teal);border-radius:18px;box-shadow:6px 6px 0 var(--teal);padding:20px 22px;margin-top:28px}
+h2{position:relative;display:inline-block;margin:0 0 4px;font-weight:900;font-size:1.3rem;color:var(--teal);z-index:0}
+h2::before{content:"";position:absolute;left:-5px;right:-8px;bottom:3px;height:.5em;background:var(--yellow);z-index:-1;transform:skewX(-14deg)}
+.sub{margin:0 0 14px;color:var(--muted);font-size:.9rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+.grid2 .panel{margin-top:28px}
+
+/* 篩選列 */
+.filters{position:sticky;top:0;z-index:20;margin-top:-30px;display:flex;flex-wrap:wrap;gap:12px 18px;align-items:flex-end;
+  background:#fff;border:3px solid var(--teal);border-radius:18px;box-shadow:6px 6px 0 var(--teal);padding:14px 18px}
+.filters label{display:flex;flex-direction:column;font-size:.82rem;font-weight:700;color:var(--teal);gap:4px}
+select{font:inherit;font-size:.95rem;color:var(--ink);background:#fff;border:2.5px solid var(--teal);border-radius:10px;padding:6px 36px 6px 12px;cursor:pointer;
+  appearance:none;-webkit-appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--teal) 50%),linear-gradient(135deg,var(--teal) 50%,transparent 50%);
+  background-position:calc(100% - 19px) 52%,calc(100% - 13px) 52%;background-size:6px 6px;background-repeat:no-repeat}
+select:focus,input:focus,button:focus-visible{outline:none;box-shadow:0 0 0 4px rgba(26,213,222,.45)}
+.btn{font:inherit;font-weight:900;font-size:.95rem;background:var(--yellow);color:var(--teal);border:2.5px solid var(--teal);border-radius:10px;padding:6px 16px;cursor:pointer;box-shadow:3px 3px 0 var(--teal)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--teal)}
+.stamp{margin-left:auto;font-size:.82rem;color:var(--muted);align-self:center}
+
+/* 狀態訊息 */
+.notice{margin-top:24px;padding:14px 18px;border-radius:14px;border:3px solid var(--teal);background:#E5FAFB;font-weight:500}
+.notice.err{background:#FDECE7;border-color:var(--alert);color:#7a2a17}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:28px}
+.kpi{background:#fff;border:3px solid var(--teal);border-radius:16px;box-shadow:5px 5px 0 var(--teal);padding:14px 18px}
+.kpi .k{font-size:.88rem;font-weight:700;color:var(--muted)}
+.kpi .v{font-size:2.3rem;font-weight:900;color:var(--teal);line-height:1.2;font-variant-numeric:tabular-nums}
+.kpi .v small{font-size:1rem;font-weight:700;margin-left:2px}
+.kpi .d{font-size:.84rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.kpi .d b{color:var(--ink)}
+.kpi.hl{background:var(--yellow)}
+
+/* 量表圖例 */
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem;color:var(--ink);margin:0 0 10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+/* 各題分布（100% 堆疊） */
+.lk-row{display:grid;grid-template-columns:minmax(180px,34%) 1fr 64px;gap:12px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line)}
+.lk-row:last-child{border-bottom:0}
+.lk-label{font-size:.92rem}
+.lk-label .tag{display:inline-block;font-size:.7rem;font-weight:700;color:var(--teal);background:#E5FAFB;border-radius:5px;padding:0 5px;margin-left:4px;vertical-align:1px}
+.lk-bar{display:flex;gap:2px;height:28px}
+.lk-bar span{display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:700;min-width:0;overflow:hidden;white-space:nowrap;cursor:default}
+.lk-bar span:first-child{border-radius:4px 0 0 4px}.lk-bar span:last-child{border-radius:0 4px 4px 0}
+.lk-bar span:only-child{border-radius:4px}
+.lk-mean{text-align:right;font-weight:900;color:var(--teal);font-variant-numeric:tabular-nums}
+.lk-mean small{display:block;font-weight:500;font-size:.72rem;color:var(--muted)}
+.section-head{font-size:.8rem;font-weight:900;color:var(--muted);margin:14px 0 2px}
+
+/* 逐年比較表 */
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:separate;border-spacing:3px;width:100%;font-variant-numeric:tabular-nums}
+th{font-size:.82rem;color:var(--teal);text-align:center;padding:6px 8px;white-space:nowrap}
+th:first-child{text-align:left}
+td{padding:6px 10px;text-align:center;border-radius:6px;font-size:.92rem}
+td:first-child{text-align:left;background:none!important;font-size:.88rem;min-width:220px}
+td .m{font-weight:900;display:block;line-height:1.2}
+td .p{font-size:.72rem;opacity:.85}
+tr.n td{font-size:.8rem;color:var(--muted)}
+.scale-note{display:flex;align-items:center;gap:8px;font-size:.8rem;color:var(--muted);margin-top:10px}
+.scale-note .ramp{width:140px;height:10px;border-radius:5px;background:linear-gradient(90deg,#EAF6F7,#0F6E75)}
+
+/* 長條（單一系列） */
+.hbar{display:grid;grid-template-columns:minmax(96px,30%) 1fr 76px;gap:10px;align-items:center;padding:4px 0;font-size:.88rem}
+.hbar .track{height:18px;position:relative}
+.hbar .fill{height:100%;background:var(--s4);border-radius:0 4px 4px 0;min-width:2px}
+.hbar .num{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.hbar .num small{color:var(--muted)}
+.hbar.zero{color:var(--muted)}
+
+/* 點圖（平均分數） */
+.dot-axis{display:grid;grid-template-columns:minmax(96px,30%) 1fr 70px;gap:10px;font-size:.72rem;color:var(--muted)}
+.dot-axis .ticks{position:relative;height:16px}
+.dot-axis .ticks span{position:absolute;transform:translateX(-50%)}
+.dot{display:grid;grid-template-columns:minmax(96px,30%) 1fr 70px;gap:10px;align-items:center;padding:5px 0;font-size:.88rem}
+.dot .track{position:relative;height:22px}
+.dot .track::before{content:"";position:absolute;left:0;right:0;top:50%;height:2px;background:var(--line)}
+.dot .pt{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:var(--teal);border:2px solid #fff;box-shadow:0 0 0 2px var(--teal);transform:translate(-50%,-50%);cursor:default}
+.dot .num{text-align:right;font-weight:900;color:var(--teal);font-variant-numeric:tabular-nums}
+.dot .num small{display:block;font-size:.7rem;font-weight:500;color:var(--muted);line-height:1}
+.dot.thin{color:var(--muted)} .dot.thin .pt{background:#fff}
+
+/* 質性回饋 */
+.qbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+.qbar input{font:inherit;font-size:.92rem;border:2.5px solid var(--teal);border-radius:10px;padding:6px 12px;min-width:220px;flex:1}
+.tabs{display:flex;gap:6px}
+.tab{font:inherit;font-size:.88rem;font-weight:700;border:2.5px solid var(--teal);background:#fff;color:var(--teal);border-radius:10px;padding:5px 12px;cursor:pointer}
+.tab[aria-selected=true]{background:var(--yellow)}
+.comments{list-style:none;margin:0;padding:0;max-height:560px;overflow:auto}
+.comments li{padding:10px 2px;border-bottom:1px dashed var(--line)}
+.comments .who{font-size:.76rem;color:var(--muted);margin-bottom:2px}
+.comments .who b{color:var(--teal);font-weight:700}
+.comments p{margin:0}
+.empty{color:var(--muted);font-size:.9rem;padding:8px 0}
+.contact-note{font-size:.82rem;color:var(--muted);margin-top:10px}
+
+/* 提示框 */
+#tip{position:fixed;pointer-events:none;z-index:60;background:var(--teal);color:#fff;font-size:.82rem;line-height:1.5;padding:7px 10px;border-radius:8px;box-shadow:3px 3px 0 var(--teal-deep);opacity:0;transition:opacity .1s;max-width:260px}
+#tip b{color:var(--yellow)}
+
+footer{margin-top:56px;background:var(--teal);color:#fff;padding:16px;font-size:.88rem;text-align:center}
+
+@media (max-width:900px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .grid2{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .bands{width:40%} .gridcorner{width:60%}
+  .filters{position:static}
+  .stamp{margin-left:0;width:100%}
+  .lk-row{grid-template-columns:1fr 56px;gap:4px 10px}
+  .lk-label{grid-column:1 / -1}
+  .kpi .v{font-size:1.9rem}
+  .panel{padding:16px}
+}
+@media print{
+  .filters{position:static;box-shadow:none} .btn{display:none}
+  .panel,.kpi{box-shadow:none;break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="art" aria-hidden="true">
+    <div class="gridcorner l"></div><div class="gridcorner r"></div>
+    <svg class="bands l" viewBox="0 0 300 600" preserveAspectRatio="none">
+      <path fill="#F8F8F6" d="M0,40 C50,60 70,40 110,90 C150,140 130,190 170,240 C210,290 250,280 280,350 L300,600 L230,600 C215,520 190,470 150,420 C110,370 130,320 90,270 C55,225 25,240 0,220 Z"/>
+      <path fill="#F4CF45" d="M0,150 C45,175 70,160 95,210 C120,260 92,300 132,350 C172,400 212,385 240,455 L280,600 L195,600 C175,540 148,515 115,470 C82,425 102,385 62,335 C32,297 14,305 0,290 Z"/>
+      <path fill="#1AD5DE" d="M0,300 C22,318 42,312 62,352 C86,402 70,432 102,472 C134,512 152,522 172,600 L95,600 C84,560 64,540 42,512 C16,476 26,444 0,425 Z"/>
+      <path fill="#1AD5DE" d="M0,0 L80,0 C66,38 86,72 64,112 C48,142 22,140 0,128 Z"/>
+    </svg>
+    <svg class="bands r" viewBox="0 0 300 600" preserveAspectRatio="none">
+      <path fill="#F8F8F6" d="M0,20 C60,50 80,30 120,80 C160,130 140,180 180,230 C220,280 260,270 290,340 L300,600 L235,600 C220,520 195,470 155,420 C115,370 135,320 95,270 C60,225 25,230 0,210 Z"/>
+      <path fill="#1AD5DE" d="M0,120 C45,150 75,135 100,185 C125,235 97,275 137,325 C177,375 217,360 245,430 L285,600 L205,600 C185,540 155,515 122,470 C89,425 109,385 69,335 C39,297 16,290 0,270 Z"/>
+      <path fill="#F4CF45" d="M0,290 C25,310 45,305 66,345 C90,395 74,425 106,465 C138,505 160,520 180,600 L100,600 C88,560 68,540 46,512 C20,476 30,444 0,420 Z"/>
+      <path fill="#F4CF45" d="M0,0 L120,0 C100,40 120,70 90,105 C65,135 30,120 0,110 Z"/>
+    </svg>
+  </div>
+  <div class="hero-inner">
+    <h1 class="title" aria-label="臨床技能中心滿意度儀表板"><span class="t1" data-text="臨床技能中心">臨床技能中心</span><span class="t2" data-text="滿意度儀表板">滿意度儀表板</span></h1>
+    <p class="org">奇美醫院 教學部 臨床技能中心</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="filters" role="group" aria-label="篩選條件">
+    <label>年度<select id="fYear"></select></label>
+    <label>身分別<select id="fRole"><option value="">全部</option></select></label>
+    <label>接觸頻率<select id="fFreq"><option value="">全部（不含未曾使用）</option></select></label>
+    <button class="btn" id="reload" type="button">重新讀取</button>
+    <span class="stamp" id="stamp">讀取中…</span>
+  </div>
+
+  <div class="notice" id="notice">正在讀取 Google Sheet 資料…</div>
+
+  <div id="dash" hidden>
+    <div class="kpis" id="kpis"></div>
+
+    <section class="panel">
+      <h2>各題滿意度分布</h2>
+      <p class="sub" id="lkSub"></p>
+      <div class="legend" id="lkLegend"></div>
+      <div id="lk"></div>
+    </section>
+
+    <section class="panel">
+      <h2>逐年比較</h2>
+      <p class="sub">每格上方為平均分數（1–5 分），下方為「滿意＋非常滿意」比例；套用上方的身分別、接觸頻率篩選。</p>
+      <div class="tbl-wrap"><table id="trend"></table></div>
+      <div class="scale-note"><span id="heatLo">平均 3.0</span><span class="ramp"></span><span>5.0</span></div>
+    </section>
+
+    <div class="grid2">
+      <section class="panel">
+        <h2>填答者身分</h2>
+        <p class="sub" id="roleSub"></p>
+        <div id="roleBars"></div>
+      </section>
+      <section class="panel">
+        <h2>接觸頻率</h2>
+        <p class="sub" id="freqSub"></p>
+        <div id="freqBars"></div>
+      </section>
+    </div>
+
+    <div class="grid2">
+      <section class="panel">
+        <h2>接觸頻率 × 平均分數</h2>
+        <p class="sub">各組 7 項原題的平均分數；人數少於 5 人的組別以空心點標示，解讀時請保守。</p>
+        <div id="freqDots"></div>
+      </section>
+      <section class="panel">
+        <h2>身分別 × 平均分數</h2>
+        <p class="sub">各身分 7 項原題的平均分數；人數少於 5 人的身分併入「其他身分」。</p>
+        <div id="roleDots"></div>
+      </section>
+    </div>
+
+    <section class="panel">
+      <h2>質性回饋</h2>
+      <p class="sub" id="qSub"></p>
+      <div class="qbar">
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" aria-selected="true" data-col="建議事項：">建議事項</button>
+          <button class="tab" role="tab" aria-selected="false" data-col="希望增加或更新的教具、設備">希望增加的教具、設備</button>
+        </div>
+        <input type="search" id="qSearch" placeholder="搜尋關鍵字，例如：空間、超音波、模具">
+      </div>
+      <ul class="comments" id="comments"></ul>
+      <p class="contact-note" id="contactNote"></p>
+    </section>
+  </div>
+</main>
+
+<footer>奇美醫院 教學部 臨床技能中心｜資料來源：臨床技能中心年度滿意度調查</footer>
+<div id="tip" role="tooltip"></div>
+
+<script>
+/* =========================== 設定 =========================== */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxnZz71HDrA5TnM6yeU2dfIWY3MEQp-uKilfy1RHf0tW_jMnXjq5PP47Oemm4gmoCoBbQ/exec";
+
+const FREQ_COL = "與臨床技能中心(含長億城OSCE考場)接觸頻率";
+const FREQS = ["幾乎每天","每週至少一次以上","每月至少一次以上","半年一次以上","每年至少一次以上","未曾使用過"];
+const NEVER = "未曾使用過";
+const LIKERT = ["非常不滿意","不滿意","普通","滿意","非常滿意"];
+const SCORE = {"非常滿意":5,"滿意":4,"普通":3,"不滿意":2,"非常不滿意":1};
+const COLORS = ["var(--s1)","var(--s2)","var(--s3)","var(--s4)","var(--s5)"];
+const INK = ["#fff","#1D2B2D","#1D2B2D","#fff","#fff"];
+/* 7 項原題：逐年比較與總體指標都以這 7 題計算，確保各年度可比 */
+const CORE = [
+  {g:"設備與場地", q:"教具充足能提供教學需求"},
+  {g:"設備與場地", q:"設備功能可提供適當操作"},
+  {g:"設備與場地", q:"空間設置與動線規劃符合教學需求"},
+  {g:"設備與場地", q:"借用流程方便性佳"},
+  {g:"人員管理", q:"當遭遇問題時，管理人員能提供適當的協助"},
+  {g:"人員管理", q:"管理人員具有迅速效率處理狀況的能力"},
+  {g:"人員管理", q:"管理人員具有良好的溝通能力"}
+];
+const EXTRA = [
+  {g:"設備與場地", q:"教具狀況良好，能定期維護更新"},
+  {g:"設備與場地", q:"空間大小足以容納課程或測驗人數"},
+  {g:"設備與場地", q:"環境音量（麥克風、計時鈴聲）、照明與溫度合宜"},
+  {g:"整體", q:"整體而言，我對臨床技能中心感到滿意"}
+];
+const EMPTY_TEXT = /^(無|没有|沒有|無意見|没意見|沒意見|無建議|沒建議|none|no|n\/?a|-|—|\.|。|ok|好|很好|謝謝|無特別意見|暫無|目前沒有|目前無)$/i;
+
+/* =========================== 工具 =========================== */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pct = (a,b) => b ? a/b*100 : NaN;
+const f1 = x => isFinite(x) ? x.toFixed(1) : "—";
+const f2 = x => isFinite(x) ? x.toFixed(2) : "—";
+const fp = x => isFinite(x) ? Math.round(x) + "%" : "—";
+
+let DATA = {};          // { "112": [rows], ... }
+let tab = "建議事項：";
+
+/* 提示框 */
+const tip = $("tip");
+document.addEventListener("mousemove", e => {
+  const t = e.target.closest("[data-tip]");
+  if (!t){ tip.style.opacity = 0; return; }
+  tip.innerHTML = t.dataset.tip;
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.min(e.clientX + 14, innerWidth - w - 8) + "px";
+  tip.style.top = (e.clientY - h - 12 < 0 ? e.clientY + 18 : e.clientY - h - 12) + "px";
+  tip.style.opacity = 1;
+});
+
+/* =========================== 讀取 =========================== */
+async function load(){
+  $("notice").hidden = false; $("notice").className = "notice"; $("notice").textContent = "正在讀取 Google Sheet 資料…";
+  try {
+    let res;
+    if (window.__DATA__) res = window.__DATA__;
+    else {
+      const r = await fetch(GAS_URL + "?action=data&t=" + Date.now());
+      res = await r.json();
+    }
+    if (!res.ok) throw new Error(res.error || "GAS 回傳錯誤");
+    DATA = res.years || {};
+    const years = Object.keys(DATA).sort((a,b) => a - b);
+    if (!years.length) throw new Error("試算表中找不到「○○○年度」工作表，或工作表內沒有資料。");
+    setupFilters(years);
+    $("stamp").textContent = "資料更新：" + new Date(res.updated || Date.now()).toLocaleString("zh-TW",{hour12:false});
+    $("notice").hidden = true; $("dash").hidden = false;
+    render();
+  } catch(err){
+    $("notice").className = "notice err";
+    $("notice").innerHTML = `無法讀取資料：${esc(err.message)}<br>請確認 Apps Script 已更新並部署「新版本」，且存取權為「所有人」。`;
+    $("stamp").textContent = "";
+  }
+}
+
+function setupFilters(years){
+  const fy = $("fYear"), keep = fy.value;
+  fy.innerHTML = years.slice().reverse().map(y => `<option value="${y}">${y} 年度</option>`).join("");
+  if (keep && years.includes(keep)) fy.value = keep;
+
+  const roles = new Set();
+  years.forEach(y => DATA[y].forEach(r => r["身分別"] && roles.add(r["身分別"])));
+  const fr = $("fRole"), kr = fr.value;
+  fr.innerHTML = `<option value="">全部</option>` + [...roles].sort((a,b)=>a.localeCompare(b,"zh-Hant")).map(v => `<option>${esc(v)}</option>`).join("");
+  fr.value = kr;
+
+  const ff = $("fFreq"), kf = ff.value;
+  ff.innerHTML = `<option value="">全部（不含未曾使用）</option>` + FREQS.filter(f => f !== NEVER).map(v => `<option>${v}</option>`).join("");
+  ff.value = kf;
+}
+
+/* =========================== 計算 =========================== */
+const rowsOf = (y, {role = $("fRole").value, freq = $("fFreq").value, usedOnly = true} = {}) =>
+  (DATA[y] || []).filter(r =>
+    (!role || r["身分別"] === role) &&
+    (!freq || r[FREQ_COL] === freq) &&
+    (!usedOnly || r[FREQ_COL] !== NEVER));
+
+function itemStats(rows, q){
+  const c = [0,0,0,0,0]; let n = 0, sum = 0;
+  rows.forEach(r => { const s = SCORE[r[q]]; if (s){ c[s-1]++; n++; sum += s; } });
+  return { c, n, mean: n ? sum/n : NaN, top2: pct(c[3]+c[4], n), top1: pct(c[4], n) };
+}
+function coreStats(rows){
+  let n = 0, sum = 0, t2 = 0, t1 = 0;
+  rows.forEach(r => CORE.forEach(it => { const s = SCORE[r[it.q]]; if (s){ n++; sum += s; if (s >= 4) t2++; if (s === 5) t1++; } }));
+  return { n, mean: n ? sum/n : NaN, top2: pct(t2,n), top1: pct(t1,n) };
+}
+const respMean = r => { let n=0,s=0; CORE.forEach(it => { const v = SCORE[r[it.q]]; if (v){ n++; s+=v; } }); return n ? s/n : NaN; };
+
+/* =========================== 繪製 =========================== */
+function render(){
+  const y = $("fYear").value;
+  const years = Object.keys(DATA).sort((a,b) => a - b);
+  const prev = years[years.indexOf(y) - 1];
+  renderKpis(y, prev);
+  renderLikert(y);
+  renderTrend(years);
+  renderBars(y);
+  renderDots(y);
+  renderComments(y);
+}
+
+function delta(cur, old, unit, digits){
+  if (!isFinite(cur) || !isFinite(old)) return "";
+  const d = cur - old, s = d > 0 ? "+" : d < 0 ? "−" : "±";
+  return `較前一年度 <b>${s}${Math.abs(d).toFixed(digits)}${unit}</b>`;
+}
+
+function renderKpis(y, prev){
+  const role = $("fRole").value;
+  const all = rowsOf(y, {freq:"", usedOnly:false});
+  const used = all.filter(r => r[FREQ_COL] !== NEVER);
+  const rows = rowsOf(y);
+  const cs = coreStats(rows);
+  let p = null;
+  if (prev){
+    const pAll = rowsOf(prev, {freq:"", usedOnly:false});
+    p = { n: pAll.length, used: pct(pAll.filter(r => r[FREQ_COL] !== NEVER).length, pAll.length), cs: coreStats(rowsOf(prev)) };
+  }
+  const usedPct = pct(used.length, all.length);
+  $("kpis").innerHTML = `
+    <div class="kpi"><div class="k">填答人數${role ? "（" + esc(role) + "）" : ""}</div>
+      <div class="v">${all.length}<small>人</small></div>
+      <div class="d">${p ? `前一年度 ${p.n} 人` : "&nbsp;"}</div></div>
+    <div class="kpi"><div class="k">曾使用中心的比例</div>
+      <div class="v">${fp(usedPct)}</div>
+      <div class="d">${used.length} 人曾使用${p ? "・" + delta(usedPct, p.used, " 個百分點", 0) : ""}</div></div>
+    <div class="kpi hl"><div class="k">滿意＋非常滿意</div>
+      <div class="v">${fp(cs.top2)}</div>
+      <div class="d">7 項原題・${cs.n} 筆作答${p ? "<br>" + delta(cs.top2, p.cs.top2, " 個百分點", 1) : ""}</div></div>
+    <div class="kpi"><div class="k">平均分數（滿分 5）</div>
+      <div class="v">${f2(cs.mean)}</div>
+      <div class="d">非常滿意占 ${fp(cs.top1)}${p ? "<br>" + delta(cs.mean, p.cs.mean, "", 2) : ""}</div></div>`;
+}
+
+function renderLikert(y){
+  const rows = rowsOf(y);
+  $("lkSub").textContent = `${y} 年度，曾使用中心的填答者 ${rows.length} 人。條上數字為該選項占比，滑鼠移上去可看人數。`;
+  $("lkLegend").innerHTML = LIKERT.map((l,i) => `<span><i style="background:${COLORS[i]}"></i>${l}</span>`).join("");
+  const items = [...CORE.map(x => ({...x, core:true})), ...EXTRA].filter(it => itemStats(rows, it.q).n > 0 || it.core);
+  const groups = [...new Set(items.map(it => it.g))];
+  $("lk").innerHTML = groups.map(g => `<div class="section-head">${g}</div>` + items.filter(it => it.g === g).map(it => {
+    const s = itemStats(rows, it.q);
+    const bar = s.n ? s.c.map((c,i) => {
+      if (!c) return "";
+      const w = c / s.n * 100;
+      return `<span style="width:${w}%;background:${COLORS[i]};color:${INK[i]}" data-tip="<b>${LIKERT[i]}</b><br>${c} 人（${w.toFixed(1)}%）">${w >= 8 ? Math.round(w) + "%" : ""}</span>`;
+    }).join("") : `<span style="width:100%;background:#F0F2F2;color:var(--muted)">本年度無此題</span>`;
+    return `<div class="lk-row"><div class="lk-label">${esc(it.q)}${it.core ? "" : '<span class="tag">新題</span>'}</div>
+      <div class="lk-bar">${bar}</div>
+      <div class="lk-mean" data-tip="平均分數（1–5）">${f2(s.mean)}<small>n=${s.n}</small></div></div>`;
+  }).join("")).join("");
+}
+
+let HEAT_LO = 3;
+function heat(mean){
+  if (!isFinite(mean)) return {bg:"#F4F5F5", fg:"var(--muted)"};
+  const t = Math.max(0, Math.min(1, (mean - HEAT_LO) / (5 - HEAT_LO)));
+  const a = [234,246,247], b = [15,110,117];
+  const c = a.map((v,i) => Math.round(v + (b[i]-v) * t));
+  return {bg:`rgb(${c})`, fg: t > .55 ? "#fff" : "#1D2B2D"};
+}
+function renderTrend(years){
+  const items = [...CORE.map(x => ({...x, core:true})), ...EXTRA];
+  const stats = years.map(y => rowsOf(y));
+  const show = items.filter(it => it.core || stats.some(r => itemStats(r, it.q).n));
+  /* 色階下限依資料調整，分數都集中在 4 分以上時仍看得出差異 */
+  const ms = show.flatMap(it => stats.map(r => itemStats(r, it.q).mean)).filter(isFinite);
+  HEAT_LO = ms.length ? Math.min(4.5, Math.floor(Math.min(...ms) * 10) / 10 - 0.2) : 3;
+  HEAT_LO = Math.max(1, HEAT_LO);
+  $("heatLo").textContent = "平均 " + HEAT_LO.toFixed(1);
+  let html = `<thead><tr><th>題目</th>${years.map(y => `<th>${y} 年度</th>`).join("")}</tr></thead><tbody>`;
+  show.forEach(it => {
+    html += `<tr><td>${esc(it.q)}${it.core ? "" : ' <span class="lk-label"><span class="tag">新題</span></span>'}</td>` + stats.map((rows,i) => {
+      const s = itemStats(rows, it.q), h = heat(s.mean);
+      return `<td style="background:${h.bg};color:${h.fg}" data-tip="<b>${years[i]} 年度</b><br>${esc(it.q)}<br>平均 ${f2(s.mean)}・滿意以上 ${fp(s.top2)}・n=${s.n}"><span class="m">${f2(s.mean)}</span><span class="p">${fp(s.top2)}</span></td>`;
+    }).join("") + `</tr>`;
+  });
+  html += `<tr><td><b>7 項原題合計</b></td>` + stats.map((rows,i) => {
+    const s = coreStats(rows), h = heat(s.mean);
+    return `<td style="background:${h.bg};color:${h.fg}"><span class="m">${f2(s.mean)}</span><span class="p">${fp(s.top2)}</span></td>`;
+  }).join("") + `</tr>`;
+  html += `<tr class="n"><td>曾使用中心的填答人數</td>${stats.map(r => `<td>${r.length}</td>`).join("")}</tr></tbody>`;
+  $("trend").innerHTML = html;
+}
+
+function hbars(el, entries, total){
+  const max = Math.max(1, ...entries.map(e => e[1]));
+  el.innerHTML = entries.map(([k,v]) => `<div class="hbar${v ? "" : " zero"}"><span>${esc(k)}</span>
+    <div class="track"><div class="fill" style="width:${v/max*100}%" data-tip="<b>${esc(k)}</b><br>${v} 人（${fp(pct(v,total))}）"></div></div>
+    <span class="num">${v}<small> 人・${fp(pct(v,total))}</small></span></div>`).join("");
+}
+function renderBars(y){
+  const role = $("fRole").value;
+  const all = rowsOf(y, {role:"", freq:"", usedOnly:false});
+  const rc = {}; all.forEach(r => { const k = r["身分別"] || "未填"; rc[k] = (rc[k]||0) + 1; });
+  hbars($("roleBars"), Object.entries(rc).sort((a,b) => b[1]-a[1]), all.length);
+  $("roleSub").textContent = `${y} 年度全部填答者 ${all.length} 人（不套用篩選）。`;
+
+  const fr = rowsOf(y, {freq:"", usedOnly:false});
+  const fc = FREQS.map(f => [f, fr.filter(r => r[FREQ_COL] === f).length]);
+  hbars($("freqBars"), fc, fr.length);
+  $("freqSub").textContent = `${y} 年度${role ? "「" + role + "」" : "全部"}填答者 ${fr.length} 人。`;
+}
+
+function dots(el, groups){
+  const vals = groups.map(g => g.mean).filter(isFinite);
+  const lo = vals.length && Math.min(...vals) >= 3 ? 3 : 1, hi = 5;
+  const x = v => (v - lo) / (hi - lo) * 100;
+  const ticks = []; for (let t = lo; t <= hi + 1e-9; t += (hi - lo) / 4) ticks.push(t);
+  el.innerHTML = `<div class="dot-axis"><span></span><div class="ticks">${ticks.map(t => `<span style="left:${x(t)}%">${t.toFixed(1)}</span>`).join("")}</div><span></span></div>` +
+    (groups.length ? groups.map(g => `<div class="dot${g.n < 5 ? " thin" : ""}"><span>${esc(g.k)}</span>
+      <div class="track">${isFinite(g.mean) ? `<span class="pt" style="left:${x(g.mean)}%" data-tip="<b>${esc(g.k)}</b><br>平均 ${f2(g.mean)}・${g.n} 人"></span>` : ""}</div>
+      <span class="num">${f2(g.mean)}<small>${g.n} 人</small></span></div>`).join("") : `<p class="empty">沒有符合條件的資料。</p>`);
+}
+function groupMeans(rows, keyFn){
+  const m = {};
+  rows.forEach(r => { const v = respMean(r); if (!isFinite(v)) return; const k = keyFn(r); (m[k] = m[k] || []).push(v); });
+  return m;
+}
+function renderDots(y){
+  const fm = groupMeans(rowsOf(y, {freq:""}), r => r[FREQ_COL]);
+  dots($("freqDots"), FREQS.filter(f => f !== NEVER && fm[f]).map(f => ({k:f, n:fm[f].length, mean: fm[f].reduce((a,b)=>a+b,0)/fm[f].length})));
+
+  const rm = groupMeans(rowsOf(y, {role:""}), r => r["身分別"] || "未填");
+  const big = [], small = [];
+  Object.entries(rm).forEach(([k,v]) => (v.length >= 5 ? big : small).push([k,v]));
+  const g = big.map(([k,v]) => ({k, n:v.length, mean:v.reduce((a,b)=>a+b,0)/v.length})).sort((a,b) => b.n - a.n);
+  if (small.length){ const v = small.flatMap(s => s[1]); g.push({k:`其他身分（${small.length} 類）`, n:v.length, mean:v.reduce((a,b)=>a+b,0)/v.length}); }
+  dots($("roleDots"), g);
+}
+
+function renderComments(y){
+  const rows = rowsOf(y, {usedOnly:false, freq:$("fFreq").value});
+  const q = $("qSearch").value.trim().toLowerCase();
+  const list = rows.map(r => ({r, t: (r[tab] || "").trim()}))
+    .filter(x => x.t && !EMPTY_TEXT.test(x.t.replace(/\s/g,"")))
+    .filter(x => !q || x.t.toLowerCase().includes(q));
+  const total = rows.filter(r => (r[tab]||"").trim() && !EMPTY_TEXT.test(r[tab].trim().replace(/\s/g,""))).length;
+  $("qSub").textContent = `${y} 年度共 ${total} 則有內容的回饋（已排除「無」等空白回答）${q ? `，搜尋「${q}」符合 ${list.length} 則` : ""}。`;
+  $("comments").innerHTML = list.length ? list.map(({r,t}) =>
+    `<li><div class="who"><b>${esc(r["身分別"] || "未填")}</b>・${esc(r[FREQ_COL] || "")}${r["填答日期"] ? "・" + esc(r["填答日期"]) : ""}</div><p>${esc(t)}</p></li>`).join("")
+    : `<li class="empty">${total ? "沒有符合搜尋的回饋。" : "本年度沒有這一題的回饋。"}</li>`;
+  const nc = rows.filter(r => +r["_有聯繫方式"] === 1).length;
+  $("contactNote").textContent = nc ? `另有 ${nc} 位填答者留下聯繫方式，基於個資保護不在儀表板顯示，請至 Google Sheet 查看。` : "";
+}
+
+/* =========================== 事件 =========================== */
+["fYear","fRole","fFreq"].forEach(id => $(id).addEventListener("change", render));
+$("qSearch").addEventListener("input", () => renderComments($("fYear").value));
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", x === b));
+  tab = b.dataset.col; renderComments($("fYear").value);
+}));
+$("reload").addEventListener("click", load);
+load();
+</script>
+</body>
+</html>
