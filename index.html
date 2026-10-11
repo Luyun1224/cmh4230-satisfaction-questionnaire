@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>臨床技能中心滿意度調查｜奇美醫院</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --yellow:#FFE500;      /* 標題亮黃 */
+  --mustard:#F4CF45;     /* 波浪帶芥末黃 */
+  --cyan:#1AD5DE;        /* 波浪帶青 */
+  --teal:#0E4B4F;        /* 描邊深青 */
+  --teal-deep:#08353A;
+  --grey:#E6E6E6;
+  --paper:#F3F3F1;
+  --ink:#1D2B2D;
+  --muted:#5C6B6D;
+  --alert:#E2502C;
+  --grid:#2A2B2C;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{
+  margin:0;color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  font-size:17px;line-height:1.75;
+  background-color:var(--paper);
+  background-image:linear-gradient(rgba(14,75,79,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(14,75,79,.05) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+.progress{position:fixed;inset:0 0 auto 0;height:6px;background:var(--teal);z-index:30}
+.progress i{display:block;height:100%;width:0;background:var(--yellow);transition:width .3s ease}
+
+/* ================= 主視覺 ================= */
+.hero{position:relative;overflow:hidden;height:clamp(440px,60vw,640px);border-bottom:5px solid var(--teal)}
+.art{position:absolute;inset:0;overflow:hidden;
+  background:
+    radial-gradient(ellipse 55% 50% at 50% 38%, rgba(255,252,224,.95), rgba(255,255,255,0) 70%),
+    repeating-conic-gradient(from -90deg at 50% 0%, #EFEFEF 0 2.5deg, #DFDFDF 2.5deg 5deg),
+    var(--grey);
+}
+.gridcorner{position:absolute;bottom:0;width:44%;height:62%;
+  background-color:var(--grid);
+  background-image:linear-gradient(rgba(255,255,255,.13) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.13) 1px,transparent 1px);
+  background-size:30px 30px}
+.gridcorner.l{left:0;clip-path:polygon(0 28%,100% 100%,0 100%)}
+.gridcorner.r{right:0;clip-path:polygon(100% 28%,100% 100%,0 100%)}
+.bands{position:absolute;top:0;height:100%;width:34%}
+.bands.l{left:0}
+.bands.r{right:0;transform:scaleX(-1)}
+.doodle{position:absolute;filter:drop-shadow(5px 6px 0 rgba(8,53,58,.85))}
+.d-bubble{left:16%;top:12%;width:clamp(56px,8vw,110px);transform:rotate(-8deg)}
+.d-card{right:22%;bottom:9%;width:clamp(80px,13vw,180px);transform:rotate(5deg)}
+.d-cursor{right:6%;bottom:6%;width:clamp(30px,4.4vw,62px)}
+
+.hero-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 16px}
+.badge{
+  display:inline-block;background:var(--teal);color:var(--yellow);font-weight:900;
+  font-size:clamp(.95rem,2vw,1.35rem);padding:.25em .9em;border-radius:999px;border:3px solid #fff;
+  transform:rotate(-5deg) translateX(-34%);margin-bottom:.4em;box-shadow:4px 4px 0 var(--teal-deep)
+}
+.title{margin:0;font-weight:900;font-size:clamp(2.9rem,12.5vw,7.4rem);line-height:1.08;letter-spacing:.03em;transform:skewX(-7deg)}
+.title span{position:relative;display:block;isolation:isolate;white-space:nowrap}
+.title span::before{
+  content:attr(data-text);position:absolute;inset:0;z-index:-1;color:var(--teal);
+  -webkit-text-stroke:.2em var(--teal);
+  filter:drop-shadow(.05em .06em 0 var(--teal-deep));
+}
+.title .t1{color:var(--yellow)}
+.title .t2{color:#fff;font-size:.86em;margin-left:2.6em;margin-top:.04em}
+.org{
+  margin:1.1em 0 0;background:#fff;border:3px solid var(--teal);border-radius:12px;padding:.15em 1em;
+  font-weight:700;color:var(--teal);font-size:clamp(.9rem,1.8vw,1.15rem);box-shadow:4px 4px 0 var(--teal);transform:rotate(1.5deg)
+}
+
+/* ================= 表單 ================= */
+.wrap{max-width:780px;margin:0 auto;padding:0 16px 80px}
+.intro-card{
+  position:relative;margin:-38px auto 0;z-index:3;background:#fff;border:3px solid var(--teal);border-radius:20px;
+  padding:20px 24px;box-shadow:7px 7px 0 var(--teal)
+}
+
+.intro-card p{margin:0}
+.intro-card .meta{margin-top:10px;font-size:.92rem;color:var(--muted)}
+.meta b,.star{color:var(--alert);font-weight:700}
+
+section{
+  margin-top:34px;background:#fff;border:3px solid var(--teal);border-radius:20px;padding:24px 24px 8px;
+  box-shadow:7px 7px 0 var(--teal)
+}
+h2{position:relative;display:inline-block;margin:0 0 6px;font-weight:900;font-size:1.55rem;color:var(--teal);z-index:0}
+h2::before{content:"";position:absolute;left:-6px;right:-10px;bottom:4px;height:.5em;background:var(--yellow);z-index:-1;transform:skewX(-14deg)}
+
+.item{padding:16px 0 18px;border-bottom:2px dashed rgba(14,75,79,.18);scroll-margin-top:90px}
+.item:last-child{border-bottom:0}
+.q{margin:0 0 10px;font-weight:500}
+.item.missing{border-left:5px solid var(--alert);padding-left:14px;margin-left:-4px}
+.item.missing .q::after{content:"　請作答此題";color:var(--alert);font-size:.85em;font-weight:700}
+
+.sr{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip span,.likert span{
+  display:inline-flex;align-items:center;justify-content:center;height:42px;padding:0 16px;border-radius:12px;cursor:pointer;
+  background:#fff;border:2.5px solid var(--teal);color:var(--teal);font-weight:500;font-size:.95rem;
+  transition:background .15s,transform .15s,box-shadow .15s
+}
+.chip span:hover,.likert span:hover{background:#E5FAFB}
+.chip input:checked + span,.likert input:checked + span{
+  background:var(--yellow);font-weight:900;box-shadow:3px 3px 0 var(--teal);transform:translate(-2px,-2px)
+}
+input:focus-visible + span{outline:3px solid var(--cyan);outline-offset:3px}
+
+select{
+  font:inherit;color:var(--ink);background:#fff;border:2.5px solid var(--teal);border-radius:12px;
+  padding:9px 42px 9px 14px;width:min(100%,320px);cursor:pointer;appearance:none;-webkit-appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--teal) 50%),linear-gradient(135deg,var(--teal) 50%,transparent 50%);
+  background-position:calc(100% - 22px) 52%,calc(100% - 15px) 52%;background-size:7px 7px;background-repeat:no-repeat
+}
+input[type=text],textarea{
+  width:100%;font:inherit;color:var(--ink);background:#fff;border:2.5px solid var(--teal);border-radius:12px;padding:10px 14px
+}
+textarea{min-height:110px;resize:vertical}
+select:focus,input[type=text]:focus,textarea:focus{outline:none;box-shadow:0 0 0 4px rgba(26,213,222,.45)}
+#roleOther{margin-top:10px;max-width:320px}
+.field{margin:14px 0 18px}
+.field label{display:block;margin-bottom:8px;font-weight:500}
+.opt{color:var(--muted);font-size:.85rem;font-weight:400}
+.skip-note{margin:6px 0 16px;background:#E5FAFB;border-left:5px solid var(--cyan);padding:10px 14px;border-radius:8px;font-weight:500}
+
+.submit-row{margin-top:40px;display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px}
+.primary{
+  font:inherit;font-weight:900;font-size:1.2rem;letter-spacing:.08em;background:var(--yellow);color:var(--teal);
+  border:3px solid var(--teal);border-radius:16px;padding:13px 48px;cursor:pointer;box-shadow:6px 6px 0 var(--teal);
+  transition:transform .1s,box-shadow .1s
+}
+.primary:hover{background:#FFEC40}
+.primary:active{transform:translate(4px,4px);box-shadow:2px 2px 0 var(--teal)}
+.primary:disabled{opacity:.6;cursor:wait}
+.primary:focus-visible,.ghost:focus-visible{outline:3px solid var(--cyan);outline-offset:4px}
+.count{color:var(--muted);font-size:.92rem;font-weight:500}
+.status{color:var(--alert);font-weight:700;margin:14px 0 0;min-height:1.5em}
+
+.thanks{display:none;margin-top:40px;text-align:center;padding:48px 20px;background:#fff;border:3px solid var(--teal);border-radius:20px;box-shadow:7px 7px 0 var(--teal)}
+.thanks .title{font-size:clamp(2.2rem,8vw,3.6rem)}
+.thanks p{margin:18px 0 0;color:var(--muted)}
+.demo{color:var(--alert)!important;font-size:.9rem}
+
+footer{margin-top:60px;background:var(--teal);color:#fff;padding:18px 16px}
+footer .in{max-width:780px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-size:.9rem}
+.ghost{background:none;border:2px solid #fff;color:#fff;border-radius:999px;padding:6px 16px;font:inherit;font-size:.88rem;font-weight:700;cursor:pointer}
+.ghost:hover{background:var(--yellow);color:var(--teal);border-color:var(--yellow)}
+
+/* ================= 張貼海報 ================= */
+.overlay{position:fixed;inset:0;background:rgba(8,30,32,.85);display:none;place-items:center;z-index:50;padding:20px;overflow:auto}
+.overlay.open{display:grid}
+.sheet{
+  width:min(92vw,520px,calc((100vh - 120px) * 210 / 297));aspect-ratio:210/297;position:relative;overflow:hidden;border:4px solid var(--teal);
+  container-type:inline-size;-webkit-print-color-adjust:exact;print-color-adjust:exact
+}
+.sheet .art{position:absolute;inset:0}
+.sheet .gridcorner{height:40%}
+.sheet .bands{width:46%}
+.sheet .d-card,.sheet .d-bubble{display:none}
+.sheet-inner{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5cqw;padding:8cqw}
+.sheet .badge{font-size:4.6cqw;transform:rotate(-5deg)}
+.sheet .title{font-size:12.6cqw}
+.qr-box{background:#fff;border:4px solid var(--teal);border-radius:16px;padding:3.2cqw;box-shadow:6px 6px 0 var(--teal);text-align:center}
+.qr img,.qr canvas{display:block;width:42cqw!important;height:auto!important;margin:0 auto}
+.qr-warn{font-size:.85rem;color:var(--alert);max-width:44cqw;margin:0}
+.qr-box .how{margin:2.4cqw 0 0;font-weight:900;color:var(--teal);font-size:4.2cqw;line-height:1.4}
+.sheet .org{font-size:3.4cqw}
+.poster-actions{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:16px}
+.poster-actions .ghost{padding:10px 24px;font-size:1rem}
+
+@media (max-width:640px){
+  .bands{width:46%}
+  .gridcorner{width:60%;height:46%}
+  .d-bubble{left:6%;top:9%}
+  .d-card{display:none}
+  .badge{transform:rotate(-5deg) translateX(-20%)}
+  .title .t2{margin-left:1.2em}
+  section,.intro-card{padding-left:18px;padding-right:18px}
+  .scale5{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+  .scale5 .likert span{width:100%;padding:0 1px;font-size:.74rem;height:46px;border-radius:10px;white-space:nowrap;letter-spacing:-.02em}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;scroll-behavior:auto!important}
+}
+@media print{
+  @page{size:A4;margin:0}
+  body{background:#fff}
+  body > *:not(#poster){display:none!important}
+  .overlay{position:static;display:block;background:none;padding:0}
+  .sheet{width:210mm;height:297mm;aspect-ratio:auto;border:0}
+  .poster-actions{display:none}
+}
+</style>
+</head>
+<body>
+<div class="progress" aria-hidden="true"><i id="bar"></i></div>
+
+<header class="hero">
+  <div class="art" id="art" aria-hidden="true">
+    <div class="gridcorner l"></div>
+    <div class="gridcorner r"></div>
+    <svg class="bands l" viewBox="0 0 300 600" preserveAspectRatio="none">
+      <path fill="#F8F8F6" d="M0,40 C50,60 70,40 110,90 C150,140 130,190 170,240 C210,290 250,280 280,350 L300,600 L230,600 C215,520 190,470 150,420 C110,370 130,320 90,270 C55,225 25,240 0,220 Z"/>
+      <path fill="#F4CF45" d="M0,150 C45,175 70,160 95,210 C120,260 92,300 132,350 C172,400 212,385 240,455 L280,600 L195,600 C175,540 148,515 115,470 C82,425 102,385 62,335 C32,297 14,305 0,290 Z"/>
+      <path fill="#1AD5DE" d="M0,300 C22,318 42,312 62,352 C86,402 70,432 102,472 C134,512 152,522 172,600 L95,600 C84,560 64,540 42,512 C16,476 26,444 0,425 Z"/>
+      <path fill="#1AD5DE" d="M0,0 L80,0 C66,38 86,72 64,112 C48,142 22,140 0,128 Z"/>
+      <path fill="#F4CF45" d="M0,470 C20,490 30,520 22,600 L0,600 Z"/>
+    </svg>
+    <svg class="bands r" viewBox="0 0 300 600" preserveAspectRatio="none">
+      <path fill="#F8F8F6" d="M0,20 C60,50 80,30 120,80 C160,130 140,180 180,230 C220,280 260,270 290,340 L300,600 L235,600 C220,520 195,470 155,420 C115,370 135,320 95,270 C60,225 25,230 0,210 Z"/>
+      <path fill="#1AD5DE" d="M0,120 C45,150 75,135 100,185 C125,235 97,275 137,325 C177,375 217,360 245,430 L285,600 L205,600 C185,540 155,515 122,470 C89,425 109,385 69,335 C39,297 16,290 0,270 Z"/>
+      <path fill="#F4CF45" d="M0,290 C25,310 45,305 66,345 C90,395 74,425 106,465 C138,505 160,520 180,600 L100,600 C88,560 68,540 46,512 C20,476 30,444 0,420 Z"/>
+      <path fill="#F4CF45" d="M0,0 L120,0 C100,40 120,70 90,105 C65,135 30,120 0,110 Z"/>
+    </svg>
+    <svg class="doodle d-bubble" viewBox="0 0 120 100"><path d="M10,10 H110 a6,6 0 0 1 6,6 V62 a6,6 0 0 1 -6,6 H48 L26,92 L30,68 H10 a6,6 0 0 1 -6,-6 V16 a6,6 0 0 1 6,-6 Z" fill="#fff" stroke="#0E4B4F" stroke-width="5"/><circle cx="38" cy="39" r="6" fill="#0E4B4F"/><circle cx="60" cy="39" r="6" fill="#0E4B4F"/><circle cx="82" cy="39" r="6" fill="#0E4B4F"/></svg>
+    <svg class="doodle d-card" viewBox="0 0 180 130"><rect x="4" y="4" width="172" height="122" rx="10" fill="#fff" stroke="#0E4B4F" stroke-width="5"/><rect x="22" y="26" width="22" height="22" rx="4" fill="#FFE500" stroke="#0E4B4F" stroke-width="4"/><path d="M27,37 l5,6 l10,-12" fill="none" stroke="#0E4B4F" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><rect x="56" y="31" width="100" height="10" rx="5" fill="#1AD5DE"/><rect x="22" y="74" width="22" height="22" rx="4" fill="#FFE500" stroke="#0E4B4F" stroke-width="4"/><path d="M27,85 l5,6 l10,-12" fill="none" stroke="#0E4B4F" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><rect x="56" y="79" width="74" height="10" rx="5" fill="#D9E3E3"/></svg>
+    <svg class="doodle d-cursor" viewBox="0 0 60 80"><path d="M6,4 L6,62 L20,49 L31,74 L42,69 L31,45 L50,45 Z" fill="#fff" stroke="#0E4B4F" stroke-width="5" stroke-linejoin="round"/></svg>
+  </div>
+
+  <div class="hero-inner">
+    <span class="badge"><span data-year></span> 年度</span>
+    <h1 class="title" aria-label="臨床技能中心滿意度調查">
+      <span class="t1" data-text="臨床技能中心">臨床技能中心</span>
+      <span class="t2" data-text="滿意度調查">滿意度調查</span>
+    </h1>
+    <p class="org">奇美醫院 教學部 臨床技能中心</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro-card">
+    <p>感謝您撥冗填寫本問卷。本問卷每年進行一次，了解您使用臨床技能中心（含長億城 OSCE 考場）的經驗，您的寶貴意見將作為我們持續改善的依據。</p>
+    <p class="meta">填答日期：<span id="today"></span>　標示 <b>*</b> 的題目為必填。</p>
+  </div>
+
+  <form id="survey" novalidate>
+    <section>
+      <h2>基本資料</h2>
+      <div class="item" data-req="1" data-name="role">
+        <p class="q"><label for="role">身分別 <span class="star">*</span></label></p>
+        <select id="role" name="role"></select>
+        <input type="text" id="roleOther" name="roleOther" placeholder="請說明您的身分（選填）" hidden>
+      </div>
+      <div class="item" data-req="1" data-name="freq">
+        <p class="q" id="freq_q">與臨床技能中心（含長億城 OSCE 考場）接觸頻率 <span class="star">*</span></p>
+        <div class="chips" role="radiogroup" aria-labelledby="freq_q" id="freqChips"></div>
+      </div>
+      <p class="skip-note" id="skipNote" hidden>您尚未使用過臨床技能中心，不需填寫後續題目，請直接送出問卷，謝謝您。</p>
+    </section>
+
+    <div id="usedPart">
+      <div id="ratingSections"></div>
+
+      <section>
+        <h2>建議與回饋</h2>
+        <div class="field">
+          <label for="advice">建議事項：</label>
+          <textarea id="advice" name="advice"></textarea>
+        </div>
+        <div class="field">
+          <label for="wish">希望中心增加或更新的教具、設備</label>
+          <textarea id="wish" name="wish" placeholder="例如：兒童 CPR 假人、教學用超音波"></textarea>
+        </div>
+        <div class="field">
+          <label for="contact">若您需要回覆，敬請留下聯繫方式 <span class="opt">（選填）</span></label>
+          <input type="text" id="contact" name="contact">
+        </div>
+      </section>
+    </div>
+
+    <div class="submit-row">
+      <button type="submit" class="primary" id="submitBtn">送出問卷</button>
+      <span class="count" id="count"></span>
+    </div>
+    <p class="status" id="status" role="alert"></p>
+  </form>
+
+  <div class="thanks" id="thanks" tabindex="-1">
+    <h2 class="title" aria-label="已送出，謝謝您"><span class="t1" data-text="謝謝您！">謝謝您！</span></h2>
+    <p>問卷已送出。您的寶貴意見會在年度檢討會議中討論，作為下一年度改善的依據。</p>
+    <p class="demo" id="demoNote" hidden>預覽模式：尚未連接 Google Sheet，這筆資料沒有被儲存（已輸出到瀏覽器 Console）。</p>
+  </div>
+</main>
+
+<footer>
+  <div class="in">
+    <span>奇美醫院 教學部 臨床技能中心</span>
+    <button type="button" class="ghost" id="posterBtn">製作張貼用 QR 海報</button>
+  </div>
+</footer>
+
+<div class="overlay" id="poster" role="dialog" aria-modal="true" aria-label="張貼用 QR 海報">
+  <div>
+    <div class="sheet">
+      <div class="art" id="posterArt" aria-hidden="true"></div>
+      <div class="sheet-inner">
+        <span class="badge"><span data-year></span> 年度</span>
+        <div class="title">
+          <span class="t1" data-text="臨床技能中心">臨床技能中心</span>
+          <span class="t2" data-text="滿意度調查">滿意度調查</span>
+        </div>
+        <div class="qr-box">
+          <div class="qr" id="qr"></div>
+          <p class="how">掃描 QR Code 填寫<br>約 3 分鐘・不記名</p>
+        </div>
+        <p class="org">奇美醫院 教學部 臨床技能中心</p>
+      </div>
+    </div>
+    <div class="poster-actions">
+      <button type="button" class="primary" id="printBtn">列印海報</button>
+      <button type="button" class="ghost" id="closePoster">關閉</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================== 設定區 =========================== */
+const CONFIG = {
+  GAS_URL: "https://script.google.com/macros/s/AKfycbxnZz71HDrA5TnM6yeU2dfIWY3MEQp-uKilfy1RHf0tW_jMnXjq5PP47Oemm4gmoCoBbQ/exec",            // 部署 Apps Script 後，把網頁應用程式網址貼在這裡
+  YEAR: null,             // 留空 = 依填答日期自動換算民國年（明年自動變 116）；跨年施測時可手動填，例如 115
+  SHOW_NEW_ITEMS: true    // 建議新增的題目（題目後標 new:true）；設成 false 就只保留原問卷題目
+};
+
+/* 身分別、接觸頻率：與原問卷選項相同 */
+const ROLES = ["主治醫師","住院醫師","PGY醫師","實習醫學生","藥師","醫事放射師","醫事檢驗師",
+               "專科護理師","護理師","營養師","呼吸治療師","聽力師","物理治療師","職能治療師",
+               "臨床心理師","語言治療師","社工師","行政","其他"];
+const FREQS = ["幾乎每天","每週至少一次以上","每月至少一次以上","半年一次以上","每年至少一次以上","未曾使用過"];
+const NEVER = "未曾使用過";
+
+/* 滿意度量表：與原問卷相同的文字選項 */
+const LIKERT = ["非常滿意","滿意","普通","不滿意","非常不滿意"];
+
+/* 原問卷 7 題逐字保留；new:true 為建議新增題 */
+const SECTIONS = [
+  { id:"equip", title:"設備與場地", items:[
+    { q:"教具充足能提供教學需求" },
+    { q:"教具狀況良好，能定期維護更新", new:true },
+    { q:"設備功能可提供適當操作" },
+    { q:"空間設置與動線規劃符合教學需求" },
+    { q:"空間大小足以容納課程或測驗人數", new:true },
+    { q:"環境音量（麥克風、計時鈴聲）、照明與溫度合宜", new:true },
+    { q:"借用流程方便性佳" }
+  ]},
+  { id:"staff", title:"人員管理", items:[
+    { q:"當遭遇問題時，管理人員能提供適當的協助" },
+    { q:"管理人員具有迅速效率處理狀況的能力" },
+    { q:"管理人員具有良好的溝通能力" }
+  ]},
+  { id:"all", title:"整體", new:true, items:[
+    { q:"整體而言，我對臨床技能中心感到滿意", new:true }
+  ]}
+];
+
+/* =========================== 日期與年度 =========================== */
+const pad = n => String(n).padStart(2,"0");
+const now = new Date();
+const ROC = now.getFullYear() - 1911;
+const YEAR = CONFIG.YEAR || ROC;
+document.querySelectorAll("[data-year]").forEach(el => el.textContent = YEAR);
+document.getElementById("today").textContent = `${ROC} 年 ${now.getMonth()+1} 月 ${now.getDate()} 日`;
+const startedAt = new Date();
+const stamp = d => `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+
+/* =========================== 產生題目 =========================== */
+const chip = (name, v) => `<label class="chip"><input class="sr" type="radio" name="${name}" value="${v}"><span>${v}</span></label>`;
+document.getElementById("role").innerHTML =
+  `<option value="">請選擇</option>` + ROLES.map(v => `<option value="${v}">${v}</option>`).join("");
+document.getElementById("freqChips").innerHTML = FREQS.map(v => chip("freq", v)).join("");
+
+const ITEMS = [];
+const host = document.getElementById("ratingSections");
+SECTIONS.forEach(sec => {
+  const items = sec.items.filter(it => CONFIG.SHOW_NEW_ITEMS || !it.new);
+  if (!items.length) return;
+  const s = document.createElement("section");
+  s.innerHTML = `<h2>${sec.title}</h2>`;
+  items.forEach((it, i) => {
+    const name = `${sec.id}_${i+1}`;
+    ITEMS.push({ name, q: it.q });
+    const d = document.createElement("div");
+    d.className = "item"; d.dataset.req = "1"; d.dataset.name = name;
+    d.innerHTML = `<p class="q" id="${name}_q">${it.q} <span class="star">*</span></p>
+      <div class="chips scale5" role="radiogroup" aria-labelledby="${name}_q">
+        ${LIKERT.map(v => `<label class="likert"><input class="sr" type="radio" name="${name}" value="${v}"><span>${v}</span></label>`).join("")}
+      </div>`;
+    s.appendChild(d);
+  });
+  host.appendChild(s);
+});
+
+/* =========================== 分流、進度、驗證 =========================== */
+const form = document.getElementById("survey");
+const bar = document.getElementById("bar");
+const countEl = document.getElementById("count");
+const statusEl = document.getElementById("status");
+const usedPart = document.getElementById("usedPart");
+const skipNote = document.getElementById("skipNote");
+const reqs = () => [...document.querySelectorAll("[data-req]")].filter(el => !el.closest("[hidden]"));
+const answered = el => {
+  const f = form.elements[el.dataset.name];
+  return f && f.tagName === "SELECT" ? f.value !== "" : !!form.querySelector(`[name="${el.dataset.name}"]:checked`);
+};
+
+function update(){
+  const r = reqs(), n = r.filter(answered).length;
+  bar.style.width = (n / r.length * 100) + "%";
+  countEl.textContent = `已完成 ${n} / ${r.length} 題必填`;
+}
+form.addEventListener("change", e => {
+  if (e.target.name === "freq"){
+    const never = e.target.value === NEVER;
+    usedPart.hidden = never;
+    skipNote.hidden = !never;
+  }
+  if (e.target.name === "role"){
+    const other = document.getElementById("roleOther");
+    other.hidden = e.target.value !== "其他";
+    if (other.hidden) other.value = "";
+  }
+  const it = e.target.closest("[data-req]");
+  if (it && answered(it)) it.classList.remove("missing");
+  if (!form.querySelector(".missing:not([hidden] *)")) statusEl.textContent = "";
+  update();
+});
+update();
+
+/* =========================== 送出 =========================== */
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  const r = reqs();
+  const missing = r.filter(el => !answered(el));
+  r.forEach(el => el.classList.toggle("missing", !answered(el)));
+  if (missing.length){
+    statusEl.textContent = `還有 ${missing.length} 題必填尚未作答，已在題目旁標示。`;
+    missing[0].scrollIntoView({behavior: reduceMotion ? "auto" : "smooth", block:"center"});
+    missing[0].querySelector("select, input").focus({preventScroll:true});
+    return;
+  }
+
+  const fd = new FormData(form);
+  const never = fd.get("freq") === NEVER;
+  const val = n => never ? "" : (fd.get(n) || "").toString().trim();
+  const done = new Date();
+  const data = {
+    "年度": YEAR,
+    "填答日期": `${done.getFullYear()-1911}/${pad(done.getMonth()+1)}/${pad(done.getDate())}`,
+    "開始時間": stamp(startedAt),
+    "完成時間": stamp(done),
+    "身分別": fd.get("role"),
+    "身分別(其他說明)": (fd.get("roleOther") || "").trim(),
+    "與臨床技能中心(含長億城OSCE考場)接觸頻率": fd.get("freq")
+  };
+  ITEMS.forEach(it => data[it.q] = val(it.name));
+  data["建議事項："] = val("advice");
+  data["希望增加或更新的教具、設備"] = val("wish");
+  data["若您需要回覆，敬請留下聯繫方式"] = val("contact");
+
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true; btn.textContent = "送出中…";
+  try {
+    let demo = false;
+    if (CONFIG.GAS_URL){
+      await fetch(CONFIG.GAS_URL, {
+        method:"POST", mode:"no-cors",
+        headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body: JSON.stringify(data)
+      });
+    } else { console.table(data); demo = true; }
+    form.style.display = "none";
+    const t = document.getElementById("thanks");
+    document.getElementById("demoNote").hidden = !demo;
+    t.style.display = "block"; bar.style.width = "100%";
+    window.scrollTo({top:0, behavior: reduceMotion ? "auto" : "smooth"});
+    t.focus({preventScroll:true});
+  } catch(err){
+    btn.disabled = false; btn.textContent = "送出問卷";
+    statusEl.textContent = "送出失敗：請確認網路連線後，再按一次「送出問卷」。";
+  }
+});
+
+/* =========================== 張貼海報 =========================== */
+document.getElementById("posterArt").innerHTML = document.getElementById("art").innerHTML;
+const poster = document.getElementById("poster");
+let qrMade = false;
+document.getElementById("posterBtn").addEventListener("click", () => {
+  if (!qrMade){
+    const box = document.getElementById("qr");
+    const url = location.href.split("#")[0];
+    if (location.protocol.startsWith("http") && window.QRCode){
+      new QRCode(box, {text:url, width:400, height:400, colorDark:"#0E4B4F", colorLight:"#ffffff", correctLevel:QRCode.CorrectLevel.M});
+    } else {
+      box.outerHTML = `<p class="qr-warn">請先把這個網頁上傳到 GitHub Pages，用正式網址開啟後再製作海報，QR Code 才會指向問卷。</p>`;
+    }
+    qrMade = true;
+  }
+  poster.classList.add("open");
+  document.getElementById("printBtn").focus();
+});
+document.getElementById("closePoster").addEventListener("click", () => poster.classList.remove("open"));
+document.getElementById("printBtn").addEventListener("click", () => window.print());
+document.addEventListener("keydown", e => { if (e.key === "Escape") poster.classList.remove("open"); });
+</script>
+</body>
+</html>
