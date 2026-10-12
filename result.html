@@ -130,6 +130,22 @@ tr.n td{font-size:.8rem;color:var(--muted)}
 .dot .num small{display:block;font-size:.7rem;font-weight:500;color:var(--muted);line-height:1}
 .dot.thin{color:var(--muted)} .dot.thin .pt{background:#fff}
 
+/* 職類滿意度比較 */
+.role-score-axis,.role-score{display:grid;grid-template-columns:minmax(110px,24%) 1fr 96px;gap:14px;align-items:center}
+.role-score-axis{font-size:.75rem;color:var(--muted);margin:20px 0 8px}
+.role-score-axis .ticks{display:flex;justify-content:space-between}
+.role-score-axis > :last-child{text-align:right}
+.role-scores{list-style:none;padding:0;margin:0}
+.role-score{padding:10px 0;border-bottom:1px dashed var(--line);font-size:.92rem}
+.role-score:last-child{border-bottom:0}
+.role-score .track{height:24px;background:repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px 20%),#F0F5F5;border-radius:5px;overflow:hidden}
+.role-score .fill{height:100%;background:var(--s5);border-radius:5px}
+.role-score .num{text-align:right;color:var(--teal);font-weight:900;font-variant-numeric:tabular-nums}
+.role-score small{display:block;font-size:.72rem;font-weight:500;color:var(--muted)}
+.role-score.selected .role-name{font-weight:900;color:var(--teal)}
+.role-score.selected .fill{background:var(--s4)}
+.role-score .sample-note{color:var(--alert)}
+
 /* 質性回饋 */
 .qbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
 .qbar input{font:inherit;font-size:.92rem;border:2.5px solid var(--teal);border-radius:10px;padding:6px 12px;min-width:220px;flex:1}
@@ -162,6 +178,8 @@ footer{margin-top:56px;background:var(--teal);color:#fff;padding:16px;font-size:
   .lk-label{grid-column:1 / -1}
   .kpi .v{font-size:1.9rem}
   .panel{padding:16px}
+  .role-score-axis,.role-score{grid-template-columns:minmax(80px,28%) 1fr 76px;gap:8px}
+  .role-score{font-size:.82rem}
 }
 @media print{
   .filters{position:static;box-shadow:none} .btn{display:none}
@@ -205,6 +223,12 @@ footer{margin-top:56px;background:var(--teal);color:#fff;padding:16px;font-size:
 
   <div id="dash" hidden>
     <div class="kpis" id="kpis"></div>
+
+    <section class="panel" aria-labelledby="roleScoreTitle">
+      <h2 id="roleScoreTitle">各職類滿意度分數比較</h2>
+      <p class="sub" id="roleScoreSub"></p>
+      <div id="roleScores"></div>
+    </section>
 
     <section class="panel">
       <h2>各題滿意度分布</h2>
@@ -383,6 +407,7 @@ function render(){
   const years = Object.keys(DATA).sort((a,b) => a - b);
   const prev = years[years.indexOf(y) - 1];
   renderKpis(y, prev);
+  renderRoleScores(y);
   renderLikert(y);
   renderTrend(years);
   renderBars(y);
@@ -507,6 +532,24 @@ function groupMeans(rows, keyFn){
   const m = {};
   rows.forEach(r => { const v = respMean(r); if (!isFinite(v)) return; const k = keyFn(r); (m[k] = m[k] || []).push(v); });
   return m;
+}
+function renderRoleScores(y){
+  const freq = $("fFreq").value, selected = $("fRole").value;
+  const groups = groupMeans(rowsOf(y, {role:""}), r => r["身分別"] || "未填身分");
+  const scores = Object.entries(groups).map(([role, values]) => ({
+    role, n:values.length, mean:values.reduce((a,b) => a+b, 0) / values.length
+  })).sort((a,b) => b.mean - a.mean || b.n - a.n || a.role.localeCompare(b.role,"zh-Hant"));
+  $("roleScoreSub").textContent = `${y} 年度${freq ? "・" + freq : ""}，比較所有職類（不含未曾使用）。先計算每人 7 項原題的有效作答平均，再取職類平均；滿分 5 分，由高至低排列。少於 5 人標示「樣本較少」。${selected ? "目前選取的身分「" + selected + "」以淺青色標示，仍保留其他職類供比較。" : ""}`;
+  if (!scores.length){
+    $("roleScores").innerHTML = `<p class="empty">沒有符合條件的滿意度作答。</p>`;
+    return;
+  }
+  $("roleScores").innerHTML = `<div class="role-score-axis" aria-hidden="true"><span>職類</span><div class="ticks">${[0,1,2,3,4,5].map(v => `<span>${v}</span>`).join("")}</div><span>平均分數／人數</span></div>
+    <ul class="role-scores">${scores.map(s => `<li class="role-score${s.role === selected ? " selected" : ""}">
+      <span class="role-name">${esc(s.role)}${s.n < 5 ? '<small class="sample-note">樣本較少</small>' : ""}</span>
+      <div class="track" aria-hidden="true"><div class="fill" style="width:${s.mean / 5 * 100}%"></div></div>
+      <span class="num">${f2(s.mean)}<small>${s.n} 人</small></span>
+    </li>`).join("")}</ul>`;
 }
 function renderDots(y){
   const fm = groupMeans(rowsOf(y, {freq:""}), r => r[FREQ_COL]);
